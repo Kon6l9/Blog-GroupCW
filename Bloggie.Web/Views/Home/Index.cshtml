@@ -1,0 +1,95 @@
+﻿@model Bloggie.Web.Models.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Main header and introduction section -->
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-5 py-5">
+        <div class="col-12 col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Bislerium</h1>
+            <p class="lead">
+                Welcome to Bislerium, your go-to source for the latest in tech trends, personal finance tips, adventures around the globe, etc. This blog app aims to share knowledge, inspire ideas, and build a community of enthusiasts who share our passion. Whether you're looking for expert insights or just a good story, we're here to provide valuable content that resonates with you. Join our community, engage with our posts, and let's explore relevant topics together!
+            </p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <img src="https://images.pexels.com/photos/57690/pexels-photo-57690.jpeg?auto=compress&cs=tinysrgb&w=600"
+                 alt="Bloggie - Dev blogs" 
+                 class="d-block mx-lg-auto img-fluid" width="300"/>
+        </div>
+    </div>
+</div>
+
+
+<!-- Sorting control and Blog posts listing -->
+<div class="container">
+    <div class="row justify-content-center mb-3">
+        <div class="col-12 d-flex justify-content-center">
+            <label for="sortOrder">Sort Blogs:</label>
+            <select id="sortOrder" asp-for="SortOrder" class="form-select ms-2" onchange="changeSort(this.value)" style="width: auto;">
+                <option value="recency">Most Recent</option>
+                <option value="random">Random</option>
+                <option value="random">Most Popular</option>
+            </select>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-12">
+            @if (Model != null && Model.BlogPosts.Any())
+            {
+                foreach (var blogPost in Model.BlogPosts)
+                {
+                    <div class="mb-5 bg-light box-shadow p-5">
+                        <img src="@blogPost.FeaturedImageUrl" alt="@blogPost.Heading"
+                             class="mb-3 d-block img-fluid" />
+                        <h2 class="mb-3">@blogPost.Heading</h2>
+                        <p class="mb-2">
+                            Author: @blogPost.Author<br>
+                            Published Date: @blogPost.PublishedDate.ToShortDateString()
+                        </p>
+
+                        <p class="mb-3">@blogPost.ShortDescription</p>
+                        <a class="btn btn-dark"
+                           asp-area=""
+                           asp-controller="Blogs"
+                           asp-action="Index"
+                           asp-route-urlHandle="@blogPost.UrlHandle">Read More</a>
+                    </div>
+                }
+                <!-- Pagination -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })">Previous</a>
+                        </li>
+                        @{
+                            int totalPages = (int)Math.Ceiling((double)Model.TotalPosts / Model.PostsPerPage);
+                            for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                </li>
+                            }
+                        }
+                        <li class="page-item @(Model.CurrentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })">Next</a>
+                        </li>
+                    </ul>
+                </nav>  
+            }
+            else
+            {
+                <p>No posts to display.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeSort(sortOrder) {
+            window.location.href = '?sort=' + sortOrder;
+        }
+    </script>
+}
